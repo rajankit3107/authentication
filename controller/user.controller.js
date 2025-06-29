@@ -4,6 +4,8 @@ import nodemailer from 'nodemailer'
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken'
 
+//register user
+
 const registerUser = async (req, res) => {
     
     //get data
@@ -26,7 +28,7 @@ const registerUser = async (req, res) => {
             email,
             password
         })
-        console.log(user)
+        // console.log(user)
 
         if(!user) {
             return res.status(400).json({message : "User not registered"})
@@ -34,7 +36,7 @@ const registerUser = async (req, res) => {
 
         //if user created assign him a token
         const token = crypto.randomBytes(32).toString("hex")
-        console.log(token)
+        // console.log(token)
 
         //saving the verification token in database
         user.verificationToken = token
@@ -55,7 +57,7 @@ const registerUser = async (req, res) => {
             to : user.email,
             subject : "verify your email",
             text : `please click the link to verify
-            ${process.env.BASE_URL}/api/v1/users/verify${token}`
+            ${process.env.BASE_URL}/api/v1/users/verify/${token}`
         }
         await transporter.sendMail(mailOptions)
 
@@ -76,9 +78,10 @@ const registerUser = async (req, res) => {
 //verify user
 
 const verifyUser = async (req, res) => {
-    //get token from the url
+    try {
+        //get token from the url
     const { token } = req.params
-    console.log(token)
+    // console.log(token)
     //validate
     if(!token) return res.status(400).json({message : "Invalid token! Try logging in again"})
     //find the user based on the token
@@ -92,6 +95,17 @@ const verifyUser = async (req, res) => {
     //save
     await user.save()
     //return response
+    res.status(200).json({
+        message : "user verified successfully",
+        success : true
+    })
+    } catch (error) {
+        res.status(400).json({
+            message : "verification failed",
+            error,
+            success : false
+        })
+    }
 }
 
 //login user
@@ -116,12 +130,24 @@ const login = async(req, res) => {
        
        //create session
        const sessiontoken = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '24h'})
+
+       const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        maxAge : 24*60*60*1000 
+       }
+
+       res.cookie("sessiontoken", sessiontoken, cookieOptions)
+
+       res.status(200).json({success : true, message : "Loggen in successfully", sessiontoken, user : {id : user._id, name : user.name, role: user.role}})
  
     } catch (error) {
-        
+        res.status(400).json({
+            message : "login unsuccessfull, please try again"
+        })
     }
     
     
 }
 
-export{registerUser, verifyUser}
+export{registerUser, verifyUser, login}
