@@ -25,18 +25,6 @@ app.use(cors({
 
 const port = process.env.PORT || 3000
 
-app.get("/", (req, res) => {
-    res.send("Hello world")
-})
-
-app.get("/ankit", (req, res) => {
-    res.send("Hey Ankit")
-})
-
-app.get("/indu", (req, res) => {
-    res.send("Hey Mumma!")
-})
-
 
 //connect to db
 db();

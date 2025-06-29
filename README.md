@@ -9,6 +9,7 @@ A Node.js/Express authentication API with email verification, JWT-based sessions
 - JWT-based session authentication (stored in HTTP-only cookies)
 - User login/logout
 - Protected profile route
+- Password reset functionality
 - MongoDB (Mongoose) user model
 - CORS support
 - Environment-based configuration
@@ -94,6 +95,18 @@ All endpoints are prefixed with `/api/v1/users`.
 - **GET** `/logout`
 - Clears the session cookie.
 
+### Forgot Password
+
+- **POST** `/forgot-password`
+- Body: `{ "email": string }`
+- Sends password reset email with token.
+
+### Reset Password
+
+- **POST** `/reset-password/:token`
+- Body: `{ "password": string }`
+- Resets password using the token from email.
+
 ## User Model
 
 - `name`: String
@@ -107,9 +120,9 @@ All endpoints are prefixed with `/api/v1/users`.
 
 ## Notes
 
-- Password reset endpoints are stubbed but not fully implemented.
 - All responses are JSON.
 - CORS is enabled for the `BASE_URL`.
+- Password reset tokens expire after 10 minutes.
 
 ## License
 

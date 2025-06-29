@@ -189,11 +189,22 @@ const logoutUser = async(req, res) => {
 const forgotPassword = async(req, res) => {
     try {
         //get email
+       const { email } = req.body
+       console.log(email)
+
+       if(!email) {
+        return res.status(400).json({message : "user do not exist"})
+       }
         //find user based on email
+        const user =  User.findOne({email})
+
+        if(!user) return res.status(400).json({message : "user not found"})
+       
         //reset token and reset expiry =>  Date.now() + 10*60*1000 => user.save
+        resetPasswordToken = crypto.randomBytes(32).toString("hex")
         //send email
     } catch (error) {
-        
+        console.log("something is wrong")
     }
 }
 
