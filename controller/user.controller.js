@@ -1,6 +1,8 @@
 import User from "../model/user.model.js";
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
+import bcrypt from "bcryptjs";
+import jwt from 'jsonwebtoken'
 
 const registerUser = async (req, res) => {
     
@@ -90,6 +92,36 @@ const verifyUser = async (req, res) => {
     //save
     await user.save()
     //return response
+}
+
+//login user
+const login = async(req, res) => {
+    const {email, password} = req.body
+
+    if(!email || !password){
+        return res.status(400).json({message : "All fields are required"})
+    } 
+
+    try {
+        const user = await User.findOne({email})
+        if(!user) {
+            return res.status(400).json({message : "User does not exist in the database"})
+        }
+       const isMatched =  await bcrypt.compare(password, user.password)
+       console.log(isMatched)
+
+       if(!isMatched) {
+        return res.status(400).json({message : "Invalid password"})
+       }
+       
+       //create session
+       const sessiontoken = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '24h'})
+ 
+    } catch (error) {
+        
+    }
+    
+    
 }
 
 export{registerUser, verifyUser}
