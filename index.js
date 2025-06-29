@@ -3,9 +3,16 @@ import dotenv from "dotenv"
 import cors from "cors"
 import db from "./utils/db.js";
 
+//import all routes
+import userRoutes from './routes/user.routes.js'
+
 dotenv.config();
 
 const app = express();
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
     origin : process.env.BASE_URL,
@@ -28,9 +35,12 @@ app.get("/indu", (req, res) => {
     res.send("Hey Mumma!")
 })
 
+
 //connect to db
 db();
 
+//user Routes
+app.use('/api/v1/users/', userRoutes)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
