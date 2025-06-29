@@ -130,6 +130,7 @@ const login = async(req, res) => {
        
        //create session
        const sessiontoken = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '24h'})
+       console.log(sessiontoken)
 
        const cookieOptions = {
         httpOnly: true,
@@ -142,6 +143,7 @@ const login = async(req, res) => {
        res.status(200).json({success : true, message : "Loggen in successfully", sessiontoken, user : {id : user._id, name : user.name, role: user.role}})
  
     } catch (error) {
+        console.log(error)
         res.status(400).json({
             message : "login unsuccessfull, please try again"
         })
@@ -150,4 +152,73 @@ const login = async(req, res) => {
     
 }
 
-export{registerUser, verifyUser, login}
+const profile = async(req, res) => {
+    const id = req.user.id
+    try {
+        const user = await User.findById(id).select('-password')
+        console.log(user)
+        if(!user) {
+            return res.status(400).json({
+                success:false,  
+                message : "user not found"
+            })
+        }
+       return res.status(200).json({
+            success : true,
+            user
+        })
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const logoutUser = async(req, res) => {
+    try {
+        res.cookie('token', "",{})
+        res.status(200).json({
+            success : true,
+            message :"logged out successfully"
+        })
+
+    } catch (error) {
+        
+    }
+}
+
+const forgotPassword = async(req, res) => {
+    try {
+        //get email
+        //find user based on email
+        //reset token and reset expiry =>  Date.now() + 10*60*1000 => user.save
+        //send email
+    } catch (error) {
+        
+    }
+}
+
+const resetPassword = async(req, res) => {
+    try {
+        //collect tokens from params
+        //password from req.body
+
+        const { sessiontoken } = req.params
+        const password = req.body
+
+        try {
+            const user = await User.findOne({
+                resetPasswordToken : sessiontoken,
+                resetPasswordExpires : {$gt : Date.now() }
+            })
+            //set password in user
+            //resetToken, resetExpires => empty
+            //save
+        } catch (error) {
+            
+        }
+
+    } catch (error) {
+        
+    }
+}
+export{registerUser, verifyUser, login, profile, logoutUser, forgotPassword, resetPassword}
